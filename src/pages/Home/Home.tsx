@@ -1,15 +1,15 @@
 import styled from "styled-components";
 import Hero from "../../components/ui/Hero/Hero";
-import { useEffect, useState } from "react";
 import CardProduct from "../../components/ui/CardProduct/CardProduct";
-import axios from "axios";
 import Pagination from "../../components/ui/Pagination/Pagination";
+import { useState } from "react";
+import { useProduct } from "../../context/ProductContext"; // Import the ProductsContext hook
 
 const HomeContainer = styled.div`
   display: flex;
   margin: 20px 0;
   justify-content: center;
-  background-color: ${(props) => props.theme.colors.background}; 
+  background-color: ${(props) => props.theme.colors.background};
 `;
 
 const ProductsGrid = styled.div`
@@ -27,55 +27,47 @@ const LoadingMessage = styled.div`
 `;
 
 const Home = () => {
-  const [products, setProducts] = useState([])
+  const { products, isLoading, error } = useProduct(); // Consume the ProductsContext
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
   const itemsPerPage = 8;
 
-  const fetchProducts = (page: number) => {
-    setIsLoading(true);
-    axios
-      .get(`http://localhost:4000/products?_page=${page}&_limit=${itemsPerPage}`)
-      .then((response) => {
-        setProducts(response.data);
-        const totalCount = response.headers["x-total-count"];
-        setTotalPages(Math.ceil(totalCount / itemsPerPage));
-      })
-      .catch((error) => console.error("Error fetching products:", error))
-      .finally(() =>   setIsLoading(false));
-  };
+  // Get the products for the current page
+  const paginatedProducts = products.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
-  useEffect(() => {
-    fetchProducts(currentPage);
-  }, [currentPage]);
+  const totalPages = Math.ceil(products.length / itemsPerPage);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
-  console.log(products)
   return (
     <>
       <HomeContainer>
         <Hero />
       </HomeContainer>
       {isLoading && <LoadingMessage>Loading products...</LoadingMessage>}
-      {!isLoading && products.length > 0 && (
+      {error && <LoadingMessage>Error: {error}</LoadingMessage>}
+      {!isLoading && paginatedProducts.length > 0 && (
         <>
-      <ProductsGrid>
-        {products.map((product: any) => (
-          <CardProduct key={product.id} {...product} />
-        ))}
-      </ProductsGrid>
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
-    </>)}
+          <ProductsGrid>
+            {paginatedProducts.map((product) => (
+              <CardProduct product={product} />
+            ))}
+          </ProductsGrid>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </>
+      )}
+      {!isLoading && products.length === 0 && !error && (
+        <LoadingMessage>No products available.</LoadingMessage>
+      )}
     </>
-
   );
 };
 

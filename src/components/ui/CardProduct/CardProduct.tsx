@@ -1,4 +1,6 @@
 import styled from "styled-components";
+import { useCart } from "../../../context/CartContext";
+import { Product } from "../../../interface";
 
 const CardContainer = styled.div`
   background: ${(props) => props.theme.colors.secondary || "#007BFF"}; /* Blue background */
@@ -59,17 +61,24 @@ const Button = styled.button`
   }
 `;
 
-const CardProduct = ({
-  name,
-  type,
-  price,
-  image,
-}: {
-  name: string;
-  type: string;
-  price: number;
-  image: string;
-}) => {
+const CardProduct = ({ product }: { product: Product }) => {
+  const { dispatch } = useCart();
+
+  const { id, name, type, price, image } = product; // Destructure product properties
+
+  const onAddToCart = () => {
+    dispatch({
+      type: "ADD_ITEM",
+      payload: {
+        id,
+        name,
+        price,
+        image,
+        quantity: 1, // Initial quantity
+      },
+    });
+  };
+
   return (
     <CardContainer>
       <ImageContainer>
@@ -78,7 +87,7 @@ const CardProduct = ({
       <CardTitle>{name}</CardTitle>
       <CardDetails>{type}</CardDetails>
       <CardDetails>${price.toFixed(2)}</CardDetails>
-      <Button>ADD TO CART</Button>
+      <Button onClick={onAddToCart}>ADD TO CART</Button>
     </CardContainer>
   );
 };
