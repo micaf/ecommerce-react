@@ -2,8 +2,9 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import { LayoutMain } from './components/Layouts/LayoutMain.tsx'
-import Cart from './pages/Cart/Cart.tsx'
 import Home from './pages/Home/Home.tsx'
+import Checkout from './pages/Checkout/Checkout.tsx'
+import PaymentPage from './pages/Payment/Payment.tsx'
 
 const router = createBrowserRouter([
   {
@@ -11,7 +12,8 @@ const router = createBrowserRouter([
   element: <LayoutMain />,
   children: [
     { index: true, element: <Home /> },
-    { path: "/cart", element: <Cart /> }
+    { path: "/checkout", element: <Checkout /> },
+    { path: "/payment", element: <PaymentPage /> }
   ]
 }
 ])

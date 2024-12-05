@@ -1,5 +1,6 @@
 import styled, { keyframes } from "styled-components";
 import { useCart } from "../../../context/CartContext";
+import { useNavigate } from "react-router-dom";
 
 // Slide animation
 const slideDown = keyframes`
@@ -111,11 +112,15 @@ const CartModal = ({
   onClose: () => void;
 }) => {
   const { state, dispatch } = useCart();
+  const navigate = useNavigate();
 
   const handleIncrement = (id: number) => dispatch({ type: "INCREMENT_QUANTITY", payload: id });
   const handleDecrement = (id: number) => dispatch({ type: "DECREMENT_QUANTITY", payload: id });
   const handleRemove = (id: number) => dispatch({ type: "REMOVE_ITEM", payload: id });
-
+  const navigateToCheckout = () => {
+    navigate('/checkout')
+    onClose();
+  }; 
   const totalAmount = state.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return isOpen ? (
@@ -143,7 +148,7 @@ const CartModal = ({
 ))}
       </CartTable>
       <TotalSection>Total: ${totalAmount.toFixed(2)}</TotalSection>
-      <CheckoutButton onClick={onClose}>Checkout</CheckoutButton>
+      <CheckoutButton onClick={navigateToCheckout}>Checkout</CheckoutButton>
     </CartModalContainer>
   ) : null;
 };

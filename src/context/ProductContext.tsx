@@ -4,35 +4,49 @@ import { getProducts } from "../service/products.service";
 
 type ProductContextType = {
   products: Product[];
-  fetchProducts: () => void;
+  fetchProducts: () => Promise<void>;
   isLoading: boolean;
   error: string | null;
 };
 
-// Create the context
 export const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
-// Provider component
 export const ProductProvider = ({ children }: { children: ReactNode }) => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true); // Start loading initially
   const [error, setError] = useState<string | null>(null);
 
   const fetchProducts = async () => {
     setIsLoading(true);
-    setError(null); // Reset error before fetching
+    setError(null);
     try {
       const data = await getProducts();
       setProducts(data);
+      localStorage.setItem("products", JSON.stringify(data)); // Persist fetched products
     } catch (err) {
-      setError((err as Error).message || "Failed to fetch products");
+      const errorMessage = err instanceof Error ? err.message : "Failed to fetch products";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchProducts();
+    const loadProducts = async () => {
+      const storedProducts = localStorage.getItem("products");
+      if (storedProducts) {
+        try {
+          const parsedProducts = JSON.parse(storedProducts) as Product[];
+          setProducts(parsedProducts); // Use stored products if available
+          setIsLoading(false); // No need to fetch if we have data
+        } catch {
+          await fetchProducts(); // Fetch if parsing fails
+        }
+      } else {
+        await fetchProducts(); // Fetch if no stored products
+      }
+    };
+    loadProducts();
   }, []);
 
   return (
@@ -42,7 +56,6 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Custom hook to use the ProductContext
 export const useProduct = () => {
   const context = useContext(ProductContext);
   if (!context) {

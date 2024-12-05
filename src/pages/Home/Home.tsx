@@ -54,7 +54,7 @@ const Home = () => {
         <>
           <ProductsGrid>
             {paginatedProducts.map((product) => (
-              <CardProduct product={product} />
+              <CardProduct key={product.id} product={product} />
             ))}
           </ProductsGrid>
           <Pagination

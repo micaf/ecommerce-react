@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, ReactNode } from "react";
+import React, { createContext, useContext, useReducer, ReactNode, useEffect } from "react";
 import { CartItem } from "../interface";
 
 
@@ -77,7 +77,14 @@ const CartContext = createContext<{
 
 // Provider
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [state, dispatch] = useReducer(cartReducer, initialState);
+  const [state, dispatch] = useReducer(cartReducer, initialState, (initial) => {
+    const storedState = localStorage.getItem("cart");
+    return storedState ? JSON.parse(storedState) : initial;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(state));
+  }, [state]);
 
   return (
     <CartContext.Provider value={{ state, dispatch }}>
