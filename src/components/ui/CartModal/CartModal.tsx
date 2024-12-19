@@ -2,7 +2,6 @@ import styled, { keyframes } from "styled-components";
 import { useCart } from "../../../context/CartContext";
 import { useNavigate } from "react-router-dom";
 
-// Slide animation
 const slideDown = keyframes`
   from {
     opacity: 0;
@@ -53,7 +52,16 @@ const CartModalContainer = styled.div`
 const CartTable = styled.div`
   display: flex;
   flex-direction: column;
+  width: 400px;
+  max-height: 400px;
+  overflow-y: scroll;
   gap: ${(props) => props.theme.spacing.medium};
+
+  ::-webkit-scrollbar{
+    width: 50px;
+    background:red;
+  }
+  
 
   .cart-item {
     display: flex;
@@ -70,10 +78,10 @@ const CartTable = styled.div`
     gap: ${(props) => props.theme.spacing.small};
 
     img {
-      width: 50px;
-      height: 50px;
+      width: 70px;
+      height: 70px;
       border-radius: ${(props) => props.theme.borders.radius.small};
-      object-fit: cover;
+      object-fit: fit;
     }
 
     .details {
@@ -129,7 +137,7 @@ const CartModal = ({
       {state.items.map((item) => (
   <div className="cart-item" key={item.id}>
     <div className="product-info">
-      <img src={item.image} alt={item.name} /> {/* Access the image property */}
+      <img src={item.image} alt={item.name} />
       <div className="details">
         <p>{item.name}</p>
         <p>${item.price.toFixed(2)}</p>

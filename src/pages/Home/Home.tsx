@@ -3,7 +3,9 @@ import Hero from "../../components/ui/Hero/Hero";
 import CardProduct from "../../components/ui/CardProduct/CardProduct";
 import Pagination from "../../components/ui/Pagination/Pagination";
 import { useState } from "react";
-import { useProduct } from "../../context/ProductContext"; // Import the ProductsContext hook
+import { UseQueryResult, useQuery } from "react-query";
+import { getProducts } from "../../service/products.service";
+import { Product } from "../../interface";
 
 const HomeContainer = styled.div`
   display: flex;
@@ -26,48 +28,46 @@ const LoadingMessage = styled.div`
   margin-top: ${(props) => props.theme.spacing.large || "32px"};
 `;
 
+type QueryResult = UseQueryResult<{ data: Product[]; total: number }, Error>;
+
 const Home = () => {
-  const { products, isLoading, error } = useProduct(); // Consume the ProductsContext
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  // Get the products for the current page
-  const paginatedProducts = products.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+  const { data, isLoading, isPreviousData, isError, error }: QueryResult = useQuery(
+    ["products", currentPage], 
+    () => getProducts(currentPage)
   );
+  const totalPages = data ? Math.ceil(data.total / itemsPerPage) : 0;
 
-  const totalPages = Math.ceil(products.length / itemsPerPage);
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
 
   return (
     <>
-      <HomeContainer>
-        <Hero />
-      </HomeContainer>
-      {isLoading && <LoadingMessage>Loading products...</LoadingMessage>}
-      {error && <LoadingMessage>Error: {error}</LoadingMessage>}
-      {!isLoading && paginatedProducts.length > 0 && (
-        <>
-          <ProductsGrid>
-            {paginatedProducts.map((product) => (
-              <CardProduct key={product.id} product={product} />
-            ))}
-          </ProductsGrid>
+    <HomeContainer>
+      <Hero />
+    </HomeContainer>
+    {isLoading ? (
+      <LoadingMessage>Loading...</LoadingMessage>
+    ) : isError ? (
+      <p>Error: {error instanceof Error ? error.message : "Something went wrong"}</p>
+    ) : (
+      <>
+        <ProductsGrid>
+          {data?.data.map((product) => (
+            <CardProduct key={product.id} product={product} />
+          ))}
+        </ProductsGrid>
+        {totalPages > 1 && (
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
-            onPageChange={handlePageChange}
+            onPageChange={(page) => setCurrentPage(page)} 
           />
-        </>
-      )}
-      {!isLoading && products.length === 0 && !error && (
-        <LoadingMessage>No products available.</LoadingMessage>
-      )}
-    </>
+        )}
+        {isPreviousData && <p>Loading new page...</p>}
+      </>
+    )}
+  </>
   );
 };
 

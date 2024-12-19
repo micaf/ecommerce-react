@@ -1,6 +1,5 @@
 import styled, { keyframes } from "styled-components";
 
-// Keyframe animation for fading in the pagination buttons
 const fadeIn = keyframes`
   from {
     opacity: 0;
@@ -53,42 +52,30 @@ const Pagination = ({
 }) => {
   if (!totalPages || totalPages < 1) return null;
 
-  // Logic to display only 3 pagination buttons
   const getVisiblePages = () => {
-    const visiblePages = [];
-    const maxVisible = 3; // Number of buttons to show
+    const maxVisible = 3;
+    let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+    let end = Math.min(totalPages, start + maxVisible - 1);
 
-    const start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
-    const end = Math.min(totalPages, start + maxVisible - 1);
-
-    for (let i = start; i <= end; i++) {
-      visiblePages.push(i);
+    if (end - start < maxVisible - 1) {
+      start = Math.max(1, end - maxVisible + 1);
     }
 
-    return visiblePages;
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   };
 
   const visiblePages = getVisiblePages();
 
   return (
     <PaginationContainer>
-      {/* First Page Button */}
-      <PaginationButton
-        onClick={() => onPageChange(1)}
-        disabled={currentPage === 1}
-      >
-         {"<<"}
+      <PaginationButton onClick={() => onPageChange(1)} disabled={currentPage === 1}>
+        {"<<"}
       </PaginationButton>
 
-      {/* Previous Page Button */}
-      <PaginationButton
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-      >
-         {"<"}
+      <PaginationButton onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1}>
+        {"<"}
       </PaginationButton>
 
-      {/* Visible Page Numbers */}
       {visiblePages.map((page) => (
         <PaginationButton
           key={page}
@@ -99,23 +86,17 @@ const Pagination = ({
         </PaginationButton>
       ))}
 
-      {/* Next Page Button */}
       <PaginationButton
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
       >
-         {">"}
+        {">"}
       </PaginationButton>
 
-      {/* Last Page Button */}
-      <PaginationButton
-        onClick={() => onPageChange(totalPages)}
-        disabled={currentPage === totalPages}
-      >
-         {">>"}
+      <PaginationButton onClick={() => onPageChange(totalPages)} disabled={currentPage === totalPages}>
+        {">>"}
       </PaginationButton>
     </PaginationContainer>
   );
 };
-
 export default Pagination;

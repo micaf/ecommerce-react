@@ -18,10 +18,10 @@ const ProductRow = styled.div`
   padding: ${(props) => props.theme.spacing.small} 0;
 
   img {
-    width: 50px;
-    height: 50px;
+    width: 70px;
+    height: 70px;
     border-radius: ${(props) => props.theme.borders.radius.small};
-    object-fit: cover;
+    object-fit: fit;
   }
 
   .details {

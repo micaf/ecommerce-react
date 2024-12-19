@@ -60,7 +60,6 @@ const LampIcon = styled.button`
 `;
 
 const Navbar: React.FC<{
-  cartItemCount: number;
   toggleTheme: () => void;
   isDarkMode: boolean;
 }> = ({ toggleTheme, isDarkMode }) => {
